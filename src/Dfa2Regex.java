@@ -12,6 +12,8 @@ public class Dfa2Regex {
         ArrayList<String> lines = readFromFile(fileName);
     }
 
+    /*Read from file operation. Takes txt file name as(filename.txt) in same direction with class.
+    returns a Arraylist includes file lines.*/
     public static ArrayList<String> readFromFile(String fileName) throws Exception {
         ArrayList<String> lines = new ArrayList<>();
         URL path = Dfa2Regex.class.getResource(fileName);
