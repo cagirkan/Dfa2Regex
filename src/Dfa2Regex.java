@@ -55,19 +55,11 @@ public class Dfa2Regex {
         //Define accept vertices
         splitArrEquals = graphInfo.get(1).split("=");
         splitArrComma = splitArrEquals[1].split(",");
-        if (splitArrComma.length <=1) {
+
+        for (int i = 0; i < splitArrComma.length; i++) {
             for (int j = 0; j < vertices.size(); j++) {
-                if (vertices.get(j).stateLabel.equals(splitArrEquals[1])) {
+                if (vertices.get(j).stateLabel.equals(splitArrComma[i])) {
                     vertices.get(j).setAccept(true);
-                }
-            }
-        }
-        else {
-            for (int i = 0; i < splitArrComma.length; i++) {
-                for (int j = 0; j < vertices.size(); j++) {
-                    if (vertices.get(j).stateLabel.equals(splitArrComma[j])) {
-                        vertices.get(j).setAccept(true);
-                    }
                 }
             }
         }
@@ -82,31 +74,45 @@ public class Dfa2Regex {
         }
 
         //Create edge relations
-        int transactionNum = vertices.size() * vertices.size();
+        int transactionNum = vertices.size() * 2;
         for (int i = 0; i < transactionNum; i++) {
             splitArrComma = graphInfo.get(i+4).split(",");
             splitArrEquals = splitArrComma[1].split("=");
+            //get vertex
             for (int j = 0; j < vertices.size(); j++) {
-                if (vertices.get(j).stateLabel.equals(splitArrEquals[1])){
-                    Edge e = new Edge(splitArrEquals[0],vertices.get(j));
-                    vertices.get(j).setComingEdge(e);
+                if (splitArrEquals[1].equals(vertices.get(j).stateLabel)){
+                    //read edge source
+                    for (int k = 0; k < vertices.size(); k++) {
+                       if (splitArrComma[0].equals(vertices.get(k).stateLabel)){
+                           //create and set edge source
+                           Edge e = new Edge(splitArrEquals[0],vertices.get(k));
+                           vertices.get(j).setComingEdge(e);
+                       }
+                    }
                 }
             }
         }
         return vertices;
     }
 
+    //Print the graph
     public static void printGraph(ArrayList<Vertex> vertices){
         System.out.println();
         for (int i = 0; i < vertices.size(); i++) {
-            System.out.println(vertices.get(i).getStateLabel());
-            System.out.println("isStart: " + vertices.get(i).isStart());
-            System.out.println("isAccept: " + vertices.get(i).isAccept());
-            System.out.println("====Edge Info=====");
+            System.out.print("State-" + i + ": Label: " + vertices.get(i).getStateLabel());
+            if (vertices.get(i).isStart()){
+                System.out.print(" (Start)");
+            }
+            if (vertices.get(i).isAccept()){
+                System.out.print(" (Accept)");
+            }
+        }
+        System.out.println("===== GRAPH =====");
+        for (int i = 0; i < vertices.size(); i++) {
             for (int j = 0; j <vertices.get(i).comingEdges.size() ; j++) {
-                System.out.print(vertices.get(i).comingEdges.get(j).source.getStateLabel() + "->");
-                System.out.println(vertices.get(i).comingEdges.get(j).edgeLabel);
-
+                System.out.print(vertices.get(i).comingEdges.get(j).source.getStateLabel() + "--");//q1
+                System.out.print(vertices.get(i).comingEdges.get(j).edgeLabel);//a
+                System.out.println("-->" + vertices.get(i).stateLabel);//a
             }
             System.out.println();
         }
