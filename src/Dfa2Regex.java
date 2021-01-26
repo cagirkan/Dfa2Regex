@@ -4,20 +4,23 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Dfa2Regex {
+    public static String epsilon = "\u03B5";
     public static ArrayList<String> alphabet = new ArrayList<>();
     public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter dfa file name (e.g. DFA1.txt) :");
-        String fileName = "DFA1.txt";
+        String fileName = "DFA2.txt";
         ArrayList<String> lines = readFromFile(fileName);
         ArrayList<Vertex> vertices = createGraph(lines);
+        printGraph(vertices);
+        System.out.println("=====DFA TO GNFA=====");
+        vertices = dfa2Gnfa(vertices);
         printGraph(vertices);
     }
 
     /*Read from file operation. Takes txt file name as(filename.txt) in same direction with class.
     returns a Arraylist includes file lines.*/
     public static ArrayList<String> readFromFile(String fileName) throws Exception {
-        String[] splittedArray = new String[10];
         ArrayList<String> lines = new ArrayList<>();
         URL path = Dfa2Regex.class.getResource(fileName);
         File file = new File(path.getFile());
@@ -28,6 +31,28 @@ public class Dfa2Regex {
             lines.add(st);
         }
         return lines;
+    }
+
+    public static ArrayList<Vertex> dfa2Gnfa(ArrayList<Vertex> vertices){
+        Vertex start = new Vertex("S",true,false);
+        Vertex accept = new Vertex("A",false,true);
+        for (int i = 0; i < vertices.size(); i++) {
+            if (vertices.get(i).isStart()){
+                //Start state change
+                vertices.get(i).setStart(false);
+                Edge e = new Edge(epsilon,start);
+                vertices.get(i).setComingEdge(e);
+            }
+            if (vertices.get(i).isAccept()){
+                //Accept states change
+                vertices.get(i).setAccept(false);
+                Edge e = new Edge(epsilon,vertices.get(i));
+                accept.setComingEdge(e);
+            }
+        }
+        vertices.add(start);
+        vertices.add(accept);
+        return vertices;
     }
 
     //Creating the graph with given graph info in txt file
@@ -99,13 +124,14 @@ public class Dfa2Regex {
     public static void printGraph(ArrayList<Vertex> vertices){
         System.out.println();
         for (int i = 0; i < vertices.size(); i++) {
-            System.out.print("State-" + i + ": Label: " + vertices.get(i).getStateLabel());
+            System.out.print("State-" + (i+1) + ": Label: " + vertices.get(i).getStateLabel());
             if (vertices.get(i).isStart()){
                 System.out.print(" (Start)");
             }
             if (vertices.get(i).isAccept()){
                 System.out.print(" (Accept)");
             }
+            System.out.println();
         }
         System.out.println("===== GRAPH =====");
         for (int i = 0; i < vertices.size(); i++) {
