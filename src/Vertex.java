@@ -20,6 +20,13 @@ class Vertex {
         this.comingEdges = new ArrayList<>();
     }
 
+    public Vertex(Vertex v) {
+        this.stateLabel = v.getStateLabel();
+        this.start = v.isStart();
+        this.accept = v.isAccept();
+        this.comingEdges = v.getComingEdges();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
