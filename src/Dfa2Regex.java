@@ -13,7 +13,7 @@ public class Dfa2Regex {
     public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter dfa file name (e.g. DFA1.txt) :");
-        String fileName = "DFA1.txt";
+        String fileName = sc.nextLine();
         ArrayList<String> lines = readFromFile(fileName);
         int stateCount = getStateCount(lines) + 2;
         graph = new Graph(stateCount);
