@@ -7,15 +7,18 @@ public class Dfa2Regex {
     public static String epsilon = "E";
     public static String union = "U";
     public static ArrayList<String> alphabet = new ArrayList<>();
-    public static boolean isLoop, comeBack;
+    public static boolean comeBack;
     public static Graph graph;
     public static ArrayList<Vertex> vertices = new ArrayList<>();
     public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter dfa file name (e.g. DFA1.txt) :");
         String fileName = sc.nextLine();
+        //read from file and assign to lines list
         ArrayList<String> lines = readFromFile(fileName);
+        //Determine the state count
         int stateCount = getStateCount(lines) + 2;
+        //create square matrix with statecount
         graph = new Graph(stateCount);
         createGraph(lines);
         System.out.println("=====DFA TO "+ (vertices.size()+2) +" state GNFA=====");
@@ -39,7 +42,9 @@ public class Dfa2Regex {
         return lines;
     }
 
+    //Convert DFA to GNFA
     public static void dfa2FirstGnfa(int stateCount){
+        //Createing start and accept vertices.
         Vertex start = new Vertex("S",true,false);
         Vertex accept = new Vertex("A",false,true);
         for (int i = 0; i < vertices.size(); i++) {
@@ -55,6 +60,7 @@ public class Dfa2Regex {
 
             }
         }
+        //Adding created vertices into vertices list
         vertices.add(start);
         vertices.add(accept);
         //set first state to q-rip
@@ -84,10 +90,12 @@ public class Dfa2Regex {
                 if (vertices.get(i).getStateLabel().equals("qr"))
                     qRip = i;
             }
+            //Control the comeback transactions with q-rip (i.e. qr to q2 and q2 to qr)
             for (int i = 0; i < graph.stateCount; i++) {
                 if (!graph.matrix[qRip][i].equals("") && qRip != i && !graph.matrix[i][qRip].equals("")) {
                     comeBack = true;
                     comeBackLabel += graph.matrix[i][qRip];
+                    //Self loop control
                     if (!graph.matrix[qRip][qRip].equals("")) {
                         comeBackLabel += "(" + graph.matrix[qRip][qRip] + ")*";
                     }
@@ -102,16 +110,22 @@ public class Dfa2Regex {
                 comeBack = false;
                 comeBackLabel = "";
             }
+
+            //Control the qn-qm transaction over q-rip
             for (int i = 0; i < graph.stateCount; i++) {
+                //Control coming transactions to qRip to qn
                 if (!graph.matrix[i][qRip].equals("") && i != qRip) {
                     transactionLabel += graph.matrix[i][qRip];
+                    //Self loop control
                     if (!graph.matrix[qRip][qRip].equals("")) {
                         transactionLabel += "(" + graph.matrix[qRip][qRip] + ")*";
                     }
                     String temp = transactionLabel;
                     for (int j = 0; j < graph.stateCount; j++) {
+                        //Control going transactions from qRip to qm
                         if (!graph.matrix[qRip][j].equals("") && j != i && j != qRip) {
                             transactionLabel += graph.matrix[qRip][j];
+                            //control if exist another way of transaction qn-qm
                             if (!graph.matrix[i][j].equals("")) {
                                 transactionLabel += union + graph.matrix[i][j];
                             }
@@ -129,28 +143,11 @@ public class Dfa2Regex {
         }
     }
 
-   /* public static void isLoop(Vertex v){
-        for (int i = 0; i < v.getComingEdges().size(); i++) {
-            if (v.getComingEdges().get(i).getSource().equals(v)){
-                isLoop = true;
-                loopLabel = v.getComingEdges().get(i).getEdgeLabel();
-            }
-        }
-    }*/
-
-  /*  public static void removeOldEdges(Vertex v, Vertex qRip){
-        for (int i = 0; i < v.getComingEdges().size(); i++) {
-            if (v.getComingEdges().get(i).getSource().equals(qRip)){
-                v.getComingEdges().remove(i);
-            }
-        }
-    }*/
-
+    //According to readings from txt file, returns count of states
     public static int getStateCount(ArrayList<String> graphInfo){
         int stateCount = 0;
         String[] splitArrEquals = new String[10];
         String[] splitArrComma = new String[10];
-        //Create graph
         splitArrEquals = graphInfo.get(3).split("=");
         splitArrComma = splitArrEquals[1].split(",");
         for (int i = 0; i < splitArrComma.length; i++) {
@@ -165,7 +162,6 @@ public class Dfa2Regex {
     public static void createGraph(ArrayList<String> graphInfo){
         String[] splitArrEquals = new String[10];
         String[] splitArrComma = new String[10];
-        //Create graph
         splitArrEquals = graphInfo.get(3).split("=");
         splitArrComma = splitArrEquals[1].split(",");
         for (int i = 0; i < splitArrComma.length; i++) {
