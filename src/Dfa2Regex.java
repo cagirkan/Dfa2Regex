@@ -9,22 +9,19 @@ public class Dfa2Regex {
     public static ArrayList<String> alphabet = new ArrayList<>();
     public static boolean isLoop, comeBack;
     public static Graph graph;
+    public static ArrayList<Vertex> vertices = new ArrayList<>();
     public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter dfa file name (e.g. DFA1.txt) :");
-        String fileName = "DFA2.txt";
+        String fileName = "DFA1.txt";
         ArrayList<String> lines = readFromFile(fileName);
         int stateCount = getStateCount(lines) + 2;
         graph = new Graph(stateCount);
-        ArrayList<Vertex> vertices = createGraph(lines);
-        graph.print(vertices,alphabet);
-        //printGraph(vertices);
+        createGraph(lines);
         System.out.println("=====DFA TO "+ (vertices.size()+2) +" state GNFA=====");
-        vertices = dfa2FirstGnfa(vertices,stateCount);
-        graph.print(vertices,alphabet);
-        vertices = gnfa2Regex(vertices);
-        graph.print(vertices,alphabet);
-        //printGraph(vertices);
+        dfa2FirstGnfa(stateCount);
+        gnfa2Regex();
+        System.out.println("\n\nRegular Expression = " + graph.matrix[stateCount-2][stateCount-1]);
     }
 
     /*Read from file operation. Takes txt file name as(filename.txt) in same direction with class.
@@ -42,7 +39,7 @@ public class Dfa2Regex {
         return lines;
     }
 
-    public static ArrayList<Vertex> dfa2FirstGnfa(ArrayList<Vertex> vertices, int stateCount){
+    public static void dfa2FirstGnfa(int stateCount){
         Vertex start = new Vertex("S",true,false);
         Vertex accept = new Vertex("A",false,true);
         for (int i = 0; i < vertices.size(); i++) {
@@ -62,12 +59,12 @@ public class Dfa2Regex {
         vertices.add(accept);
         //set first state to q-rip
         vertices.get(0).setStateLabel("qr");
-        return vertices;
+        graph.print(vertices,alphabet);
     }
 
 
 
-    public static ArrayList<Vertex> gnfa2Regex(ArrayList<Vertex> vertices){
+    public static void gnfa2Regex(){
         int qRip = 0;
         String comeBackLabel = "", loopLabel = "", transactionLabel ="";
 
@@ -78,7 +75,11 @@ public class Dfa2Regex {
             }
         }
         graph.removeEdge(graph.stateCount -2,qRip);
+
+        //Constructing equivalent GNFA with one fewer state
         for (int k = 0; k < graph.stateCount -2; k++) {
+            //define q-rip index
+            System.out.println("\n=============="+ (graph.stateCount - (k+1)) +"-state GNFA=============");
             for (int i = 0; i < vertices.size(); i++) {
                 if (vertices.get(i).getStateLabel().equals("qr"))
                     qRip = i;
@@ -86,10 +87,11 @@ public class Dfa2Regex {
             for (int i = 0; i < graph.stateCount; i++) {
                 if (!graph.matrix[qRip][i].equals("") && qRip != i && !graph.matrix[i][qRip].equals("")) {
                     comeBack = true;
+                    comeBackLabel += graph.matrix[i][qRip];
                     if (!graph.matrix[qRip][qRip].equals("")) {
                         comeBackLabel += "(" + graph.matrix[qRip][qRip] + ")*";
                     }
-                    comeBackLabel += graph.matrix[qRip][i] + graph.matrix[i][qRip];
+                    comeBackLabel += graph.matrix[qRip][i];
                     if (!graph.matrix[i][i].equals("")) {
                         comeBackLabel += union + graph.matrix[i][i];
                     }
@@ -106,15 +108,15 @@ public class Dfa2Regex {
                     if (!graph.matrix[qRip][qRip].equals("")) {
                         transactionLabel += "(" + graph.matrix[qRip][qRip] + ")*";
                     }
+                    String temp = transactionLabel;
                     for (int j = 0; j < graph.stateCount; j++) {
                         if (!graph.matrix[qRip][j].equals("") && j != i && j != qRip) {
                             transactionLabel += graph.matrix[qRip][j];
                             if (!graph.matrix[i][j].equals("")) {
                                 transactionLabel += union + graph.matrix[i][j];
-                                graph.matrix[i][j] = transactionLabel;
-                            } else
-                                graph.matrix[i][j] = transactionLabel;
-                            break;
+                            }
+                            graph.matrix[i][j] = transactionLabel;
+                            transactionLabel = temp;
                         }
                     }
                 }
@@ -123,8 +125,8 @@ public class Dfa2Regex {
             graph.removeQRip(qRip);
             vertices.get(qRip).setStateLabel("");
             vertices.get(qRip + 1).setStateLabel("qr");
+            graph.print(vertices,alphabet);
         }
-        return vertices;
     }
 
    /* public static void isLoop(Vertex v){
@@ -160,8 +162,7 @@ public class Dfa2Regex {
     }
 
     //Creating the graph with given vertices info in txt file
-    public static ArrayList<Vertex> createGraph(ArrayList<String> graphInfo){
-        ArrayList<Vertex> vertices = new ArrayList<>();
+    public static void createGraph(ArrayList<String> graphInfo){
         String[] splitArrEquals = new String[10];
         String[] splitArrComma = new String[10];
         //Create graph
@@ -220,6 +221,6 @@ public class Dfa2Regex {
                 }
             }
         }
-        return vertices;
+        graph.print(vertices,alphabet);
     }
 }
