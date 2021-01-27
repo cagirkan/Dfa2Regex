@@ -2,29 +2,25 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 class Vertex {
-    String stateLabel;
-    boolean start;
-    boolean accept;
-    ArrayList<Edge> comingEdges;
+    private String stateLabel;
+    private boolean start;
+    private boolean accept;
 
     public Vertex(String stateLabel, boolean start, boolean accept) {
         this.stateLabel = stateLabel;
         this.start = start;
         this.accept = accept;
-        this.comingEdges = new ArrayList<>();
     }
     public Vertex(String stateLabel) {
         this.stateLabel = stateLabel;
         this.start = false;
         this.accept = false;
-        this.comingEdges = new ArrayList<>();
     }
 
     public Vertex(Vertex v) {
         this.stateLabel = v.getStateLabel();
         this.start = v.isStart();
         this.accept = v.isAccept();
-        this.comingEdges = v.getComingEdges();
     }
 
     @Override
@@ -32,12 +28,12 @@ class Vertex {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Vertex vertex = (Vertex) o;
-        return start == vertex.start && accept == vertex.accept && Objects.equals(stateLabel, vertex.stateLabel) && Objects.equals(comingEdges, vertex.comingEdges);
+        return start == vertex.start && accept == vertex.accept && Objects.equals(stateLabel, vertex.stateLabel);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(stateLabel, start, accept, comingEdges);
+        return Objects.hash(stateLabel, start, accept);
     }
 
     public String getStateLabel() {
@@ -64,11 +60,4 @@ class Vertex {
         this.accept = accept;
     }
 
-    public ArrayList<Edge> getComingEdges() {
-        return comingEdges;
-    }
-
-    public void setComingEdge(Edge comingEdge) {
-        comingEdges.add(comingEdge);
-    }
 }
